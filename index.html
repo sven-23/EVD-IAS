@@ -3,73 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Click the Box Game</title>
+    <title>Dodge the Falling Blocks Game</title>
     <style>
+        /* Reset default browser styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #2C3E50;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
+            overflow: hidden;
+            color: white;
         }
 
         #game-container {
-            text-align: center;
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background-color: #3498db;
+            border: 5px solid #2980b9;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #player {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background-color: #f39c12;
+            border-radius: 5px;
+            transform: translateX(-50%);
+        }
+
+        .falling-block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #e74c3c;
+            animation: fall 2s linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                top: -40px;
+            }
+            100% {
+                top: 100%;
+            }
         }
 
         #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             font-size: 24px;
-            margin-bottom: 20px;
+            font-weight: bold;
         }
 
-        #box {
-            width: 100px;
-            height: 100px;
-            background-color: #4CAF50;
-            margin: 0 auto;
-            cursor: pointer;
-            transition: transform 0.2s ease;
+        .hidden {
+            display: none;
         }
 
-        #box:hover {
-            transform: scale(1.1);
-        }
     </style>
 </head>
 <body>
+
     <div id="game-container">
-        <h1>Click the Box Game</h1>
         <div id="score">Score: 0</div>
-        <div id="box"></div>
+        <div id="player"></div>
     </div>
 
     <script>
         let score = 0;
-        const scoreElement = document.getElementById('score');
-        const box = document.getElementById('box');
+        let player = document.getElementById('player');
+        let gameContainer = document.getElementById('game-container');
+        let scoreElement = document.getElementById('score');
+        let playerPosition = 50; // Initial player position (50% from the left)
+        let containerWidth = gameContainer.offsetWidth;
 
-        // Update score when the box is clicked
-        box.addEventListener('click', () => {
-            score++;
-            scoreElement.textContent = `Score: ${score}`;
-            moveBox();
+        // Move the player using left and right arrow keys
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' && playerPosition > 0) {
+                playerPosition -= 5;
+            }
+            if (e.key === 'ArrowRight' && playerPosition < 100 - (player.offsetWidth / containerWidth) * 100) {
+                playerPosition += 5;
+            }
+            player.style.left = `${playerPosition}%`;
         });
 
-        // Move the box to a random position on the screen
-        function moveBox() {
-            const maxWidth = window.innerWidth - 120;
-            const maxHeight = window.innerHeight - 120;
-            const randomX = Math.floor(Math.random() * maxWidth);
-            const randomY = Math.floor(Math.random() * maxHeight);
-            box.style.position = 'absolute';
-            box.style.left = randomX + 'px';
-            box.style.top = randomY + 'px';
+        // Create falling blocks every 1.5 seconds
+        setInterval(function() {
+            createFallingBlock();
+        }, 1500);
+
+        function createFallingBlock() {
+            let block = document.createElement('div');
+            block.classList.add('falling-block');
+            let randomPosition = Math.random() * (containerWidth - 40); // Random position for block
+            block.style.left = `${randomPosition}px`;
+
+            gameContainer.appendChild(block);
+
+            // Check for collision with player
+            let blockInterval = setInterval(function() {
+                let blockTop = block.offsetTop;
+                let blockLeft = block.offsetLeft;
+                let blockRight = blockLeft + block.offsetWidth;
+                let blockBottom = blockTop + block.offsetHeight;
+
+                let playerLeft = playerPosition / 100 * containerWidth;
+                let playerRight = playerLeft + player.offsetWidth;
+                let playerBottom = player.offsetTop + player.offsetHeight;
+
+                // Check if block hits the player
+                if (
+                    blockBottom >= player.offsetTop &&
+                    blockTop < playerBottom &&
+                    blockLeft < playerRight &&
+                    blockRight > playerLeft
+                ) {
+                    gameOver();
+                    clearInterval(blockInterval);
+                }
+
+                // Remove block if it goes past the bottom
+                if (blockBottom > gameContainer.offsetHeight) {
+                    gameContainer.removeChild(block);
+                    clearInterval(blockInterval);
+                }
+            }, 20);
         }
 
-        // Initial position of the box
-        moveBox();
+        // Handle game over
+        function gameOver() {
+            alert(`Game Over! Final Score: ${score}`);
+            score = 0;
+            scoreElement.textContent = `Score: ${score}`;
+            resetGame();
+        }
+
+        // Reset game to initial state
+        function resetGame() {
+            let blocks = document.querySelectorAll('.falling-block');
+            blocks.forEach(block => block.remove());
+            player.style.left = '50%'; // Reset player position
+            playerPosition = 50;
+        }
+
+        // Update score for each block
+        setInterval(function() {
+            score++;
+            scoreElement.textContent = `Score: ${score}`;
+        }, 1000);
     </script>
+
 </body>
 </html>
