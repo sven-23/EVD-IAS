@@ -1,172 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLora Mae Yting</title>
-    <style>
-        /* Reset default browser styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <title>Typing Test: Submit Then Match</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #2C3E50;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            color: white;
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background: #f4f7f8;
+      color: #333;
+      max-width: 700px;
+      margin: auto;
+    }
 
-        #game-container {
-            position: relative;
-            width: 400px;
-            height: 600px;
-            background-color: #3498db;
-            border: 5px solid #2980b9;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-        }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
 
-        #player {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            width: 40px;
-            height: 40px;
-            background-color: #f39c12;
-            border-radius: 5px;
-            transform: translateX(-50%);
-        }
+    h2 {
+      color: #34495e;
+      margin-top: 30px;
+    }
 
-        .falling-block {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background-color: #e74c3c;
-            animation: fall 2s linear infinite;
-        }
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      margin-top: 10px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      transition: border 0.3s ease;
+    }
 
-        @keyframes fall {
-            0% {
-                top: -40px;
-            }
-            100% {
-                top: 100%;
-            }
-        }
+    input[type="text"]:focus {
+      border-color: #3498db;
+      outline: none;
+    }
 
-        #score {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            font-weight: bold;
-        }
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
 
-        .hidden {
-            display: none;
-        }
+    button:hover {
+      background-color: #2980b9;
+    }
 
-    </style>
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .output {
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      padding: 15px;
+      min-height: 60px;
+      font-size: 18px;
+      margin-top: 10px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .word {
+      padding: 3px 8px;
+      margin: 4px 5px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+
+    .match {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .no-match {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    #tryAgainBtn {
+      display: none;
+      margin-top: 20px;
+      background-color: #e67e22;
+    }
+
+    #tryAgainBtn:hover {
+      background-color: #d35400;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="score">Score: 0</div>
-        <div id="player"></div>
-    </div>
+  <h1>Type IT to Match IT</h1>
 
-    <script>
-        let score = 0;
-        let player = document.getElementById('player');
-        let gameContainer = document.getElementById('game-container');
-        let scoreElement = document.getElementById('score');
-        let playerPosition = 50; // Initial player position (50% from the left)
-        let containerWidth = gameContainer.offsetWidth;
+  <div class="section" id="referenceSection">
+    <h2>Enter & Submit Reference Words</h2>
+    <input type="text" id="referenceInput" />
+    <button id="submitReference">Submit Reference Words</button>
+  </div>
 
-        // Move the player using left and right arrow keys
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft' && playerPosition > 0) {
-                playerPosition -= 5;
-            }
-            if (e.key === 'ArrowRight' && playerPosition < 100 - (player.offsetWidth / containerWidth) * 100) {
-                playerPosition += 5;
-            }
-            player.style.left = `${playerPosition}%`;
-        });
+  <div class="section">
+    <h2>Start Typing to Match</h2>
+    <input type="text" id="typingInput" placeholder="Type here..." disabled />
+  </div>
 
-        // Create falling blocks every 1.5 seconds
-        setInterval(function() {
-            createFallingBlock();
-        }, 1500);
+  <div class="section">
+    <h2>Matched Words</h2>
+    <div id="wordMatchOutput" class="output"></div>
+  </div>
 
-        function createFallingBlock() {
-            let block = document.createElement('div');
-            block.classList.add('falling-block');
-            let randomPosition = Math.random() * (containerWidth - 40); // Random position for block
-            block.style.left = `${randomPosition}px`;
+  <button id="tryAgainBtn">🔄 Try Again</button>
 
-            gameContainer.appendChild(block);
+  <script>
+    const referenceSection = document.getElementById('referenceSection');
+    const referenceInput = document.getElementById('referenceInput');
+    const submitBtn = document.getElementById('submitReference');
+    const typingInput = document.getElementById('typingInput');
+    const wordMatchOutput = document.getElementById('wordMatchOutput');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
 
-            // Check for collision with player
-            let blockInterval = setInterval(function() {
-                let blockTop = block.offsetTop;
-                let blockLeft = block.offsetLeft;
-                let blockRight = blockLeft + block.offsetWidth;
-                let blockBottom = blockTop + block.offsetHeight;
+    let referenceWords = [];
 
-                let playerLeft = playerPosition / 100 * containerWidth;
-                let playerRight = playerLeft + player.offsetWidth;
-                let playerBottom = player.offsetTop + player.offsetHeight;
+    // Debounce utility
+    function debounce(func, delay) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
 
-                // Check if block hits the player
-                if (
-                    blockBottom >= player.offsetTop &&
-                    blockTop < playerBottom &&
-                    blockLeft < playerRight &&
-                    blockRight > playerLeft
-                ) {
-                    gameOver();
-                    clearInterval(blockInterval);
-                }
+    // Function to update matched words
+    function updateMatchedWords() {
+      const typedWords = typingInput.value.trim().split(/\s+/);
+      wordMatchOutput.innerHTML = '';
 
-                // Remove block if it goes past the bottom
-                if (blockBottom > gameContainer.offsetHeight) {
-                    gameContainer.removeChild(block);
-                    clearInterval(blockInterval);
-                }
-            }, 20);
+      typedWords.forEach(word => {
+        if (word === '') return;
+        const span = document.createElement('span');
+        span.textContent = word;
+        span.classList.add('word');
+
+        if (referenceWords.includes(word.toLowerCase())) {
+          span.classList.add('match'); // Green
+        } else {
+          span.classList.add('no-match'); // Red
         }
 
-        // Handle game over
-        function gameOver() {
-            alert(`Game Over! Final Score: ${score}`);
-            score = 0;
-            scoreElement.textContent = `Score: ${score}`;
-            resetGame();
-        }
+        wordMatchOutput.appendChild(span);
+      });
+    }
 
-        // Reset game to initial state
-        function resetGame() {
-            let blocks = document.querySelectorAll('.falling-block');
-            blocks.forEach(block => block.remove());
-            player.style.left = '50%'; // Reset player position
-            playerPosition = 50;
-        }
+    const debouncedMatchUpdate = debounce(updateMatchedWords, 500);
 
-        // Update score for each block
-        setInterval(function() {
-            score++;
-            scoreElement.textContent = `Score: ${score}`;
-        }, 1000);
-    </script>
+    submitBtn.addEventListener('click', () => {
+      const text = referenceInput.value.trim();
+      if (text.length === 0) {
+        alert("Please enter some reference words.");
+        return;
+      }
+
+      referenceWords = text.toLowerCase().split(/\s+/);
+
+      referenceSection.style.display = "none";
+      typingInput.disabled = false;
+      typingInput.focus();
+
+      // Show the "Try Again" button
+      tryAgainBtn.style.display = "inline-block";
+    });
+
+    typingInput.addEventListener('input', debouncedMatchUpdate);
+
+    // Refresh page on Try Again click
+    tryAgainBtn.addEventListener('click', () => {
+      location.reload();
+    });
+  </script>
 
 </body>
 </html>
