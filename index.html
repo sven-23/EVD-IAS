@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click the Box Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        #game-container {
+            text-align: center;
+        }
+
+        #score {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #box {
+            width: 100px;
+            height: 100px;
+            background-color: #4CAF50;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #box:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Click the Box Game</h1>
+        <div id="score">Score: 0</div>
+        <div id="box"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        const scoreElement = document.getElementById('score');
+        const box = document.getElementById('box');
+
+        // Update score when the box is clicked
+        box.addEventListener('click', () => {
+            score++;
+            scoreElement.textContent = `Score: ${score}`;
+            moveBox();
+        });
+
+        // Move the box to a random position on the screen
+        function moveBox() {
+            const maxWidth = window.innerWidth - 120;
+            const maxHeight = window.innerHeight - 120;
+            const randomX = Math.floor(Math.random() * maxWidth);
+            const randomY = Math.floor(Math.random() * maxHeight);
+            box.style.position = 'absolute';
+            box.style.left = randomX + 'px';
+            box.style.top = randomY + 'px';
+        }
+
+        // Initial position of the box
+        moveBox();
+    </script>
+</body>
+</html>
